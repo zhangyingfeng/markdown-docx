@@ -7,6 +7,7 @@
     "build": "tsdown",
     "test": "vitest",
     "test:coverage": "vitest run --coverage",
+    "prepare": "tsdown",
     "prepublishOnly": "pnpm run build",
     "release-it": "release-it",
     "ts-check": "tsc --noEmit"
