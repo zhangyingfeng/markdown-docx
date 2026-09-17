@@ -38,6 +38,29 @@ export interface MarkdownDocxOptions extends MarkedOptions {
   ignoreHtml?: boolean
 
   /**
+   * Strip a leading YAML frontmatter block (--- ... ---) before conversion,
+   * so it doesn't get rendered as visible document text.
+   * @default true
+   */
+  stripFrontmatter?: boolean
+
+  /**
+   * Maximum image width in pixels (at 96dpi, matching MarkdownImageItem's
+   * existing width/height convention). Images wider than this are scaled
+   * down proportionally; never upscaled. Ignored for an image whose
+   * Markdown title already specifies an explicit size (see
+   * parseImageTitleSize). Set to a falsy value to disable.
+   * @default 600
+   */
+  imageMaxWidth?: number
+
+  /**
+   * Maximum image height in pixels, same semantics as imageMaxWidth.
+   * @default 800
+   */
+  imageMaxHeight?: number
+
+  /**
    * Properties for the document
    */
   document?: Omit<IPropertiesOptions, 'sections'>

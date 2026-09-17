@@ -16,7 +16,7 @@ export function renderImage(render: MarkdownDocx, block: Tokens.Image, attr: ITe
     return renderText(render, `[!${block.text}](${block.href})`, attr)
   }
 
-  const { width, height, title } = parseImageTitleSize(block, image)
+  const { width, height, title } = parseImageTitleSize(render, block, image)
 
   return new ImageRun({
     type: image.type,
@@ -35,17 +35,14 @@ export function renderImage(render: MarkdownDocx, block: Tokens.Image, attr: ITe
  * Parse image size from token title
  * Supports format like "600x400" or "50%x50%" in title attribute
  */
-export function parseImageTitleSize(block: Tokens.Image, image: MarkdownImageItem) {
+export function parseImageTitleSize(render: MarkdownDocx, block: Tokens.Image, image: MarkdownImageItem) {
   const title = block.title?.trim()
 
   const match = title ? title.match(/^(\d+%?)x(\d+%?)$/) : null
 
   if (!match) {
-    return {
-      width: image.width,
-      height: image.height,
-      title: block.title
-    }
+    const { width, height } = clampImageSize(image.width, image.height, render.options.imageMaxWidth, render.options.imageMaxHeight)
+    return { width, height, title: block.title }
   }
 
   const width = match[1].endsWith('%') ? parseInt(match[1], 10) / 100 * image.width : parseInt(match[1], 10)
@@ -57,4 +54,17 @@ export function parseImageTitleSize(block: Tokens.Image, image: MarkdownImageIte
     // remove title
     title: ''
   }
+}
+
+/**
+ * Scales width/height down (preserving aspect ratio) so neither exceeds the
+ * given max, e.g. so a full-resolution screenshot doesn't render wider than
+ * the page's content area. Never upscales a smaller image. An explicit
+ * "WxH" title override (see parseImageTitleSize above) bypasses this
+ * entirely — this only applies to an image's natural/adapter-reported size.
+ */
+export function clampImageSize(width: number, height: number, maxWidth?: number, maxHeight?: number) {
+  const scale = Math.min(1, maxWidth ? maxWidth / width : 1, maxHeight ? maxHeight / height : 1)
+  if (scale >= 1) return { width, height }
+  return { width: Math.round(width * scale), height: Math.round(height * scale) }
 }

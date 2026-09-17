@@ -5,13 +5,16 @@ import { renderBlocks, renderTokens } from './renders'
 import { createDocumentStyle, numbering, styles } from './styles'
 import { tokenize } from './tokenize'
 import { IBlockAttr, IBlockToken, IInlineToken, ITextAttr, MarkdownDocxOptions, MarkdownImageItem } from './types'
-import { getImageTokens, resolvePageMargins } from './utils'
+import { getImageTokens, resolvePageMargins, stripFrontmatter } from './utils'
 
 export class MarkdownDocx {
 
   public static defaultOptions: MarkdownDocxOptions = {
     gfm: true,
     math: { engine: 'katex' },
+    stripFrontmatter: true,
+    imageMaxWidth: 600,
+    imageMaxHeight: 800,
   }
 
   public styles = styles
@@ -37,6 +40,10 @@ export class MarkdownDocx {
     this.options = {
       ...MarkdownDocx.defaultOptions,
       ...options,
+    }
+
+    if (this.options.stripFrontmatter) {
+      this.markdown = stripFrontmatter(this.markdown)
     }
   }
 

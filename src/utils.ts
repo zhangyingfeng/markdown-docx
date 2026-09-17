@@ -3,6 +3,22 @@ import { Tokens } from 'marked'
 
 import { IBlockAttr, IMarkdownTheme, MarkdownImageType } from './types'
 
+/**
+ * Removes a leading YAML frontmatter block (--- ... ---) so it doesn't get
+ * rendered as ordinary paragraph text — the marked/commonmark parser has no
+ * concept of frontmatter and would otherwise pass it straight through.
+ * Only matches at the very start of the document, per the YAML frontmatter
+ * convention; a "---" elsewhere (e.g. a Markdown horizontal rule or a
+ * setext heading underline) is left untouched.
+ */
+export function stripFrontmatter(markdown: string): string {
+  // The trailing \s* also consumes the blank line(s) typically left between
+  // the closing "---" and the first real heading, so callers never end up
+  // with a stray leading blank line/paragraph in the rendered output.
+  const match = /^---\r?\n[\s\S]*?\r?\n---\r?\n\s*/.exec(markdown)
+  return match ? markdown.slice(match[0].length) : markdown
+}
+
 export function getHeadingLevel(level?: number) {
   if (level == null) {
     return undefined
